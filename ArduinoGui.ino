@@ -48,38 +48,6 @@ bool touched = false;
 bool pendingTouchAction = false;
 uint16_t pendingTouchActionDelay = 0;
 
-// UI items
-Label lblMinipixel(dc, Point(150, 30), "minipixel24");
-Label lblSquareFont(dc, Point(150, 60), "squarefont14");
-Label lblSquareFuture(dc, Point(150, 90), "squareFuture20");
-Label lblSquareOne14(dc, Point(300, 30), "squareOne14");
-Label lblSquareOne24(dc, Point(300, 60), "squareOne24");
-Label lblRubic36(dc, Point(300, 90), "rubic36");
-Button btn1(dc, Point(20, 40), Dimensions(100, 60), "Btn1");
-
-//
-//void drawButton(uint16_t x, uint16_t y, uint16_t w, uint16_t h, const char* label, bool pressed)
-//{
-//	tft.fillRect(x, y, w, h, MakeColour(0xea));
-//
-//	uint16_t color1 = (pressed) ? MakeColour(0x9) : MakeColour(0xf0);
-//	uint16_t color2 = (pressed) ? MakeColour(0xf0) : MakeColour(0x9);
-//
-//	uint8_t textWidth = strlen(label) * tft.getFontWidth();
-//
-//	tft.setCursor(
-//		(x + (h / 2)) - (tft.getFontHeight() / 2),
-//		(y + (w / 2)) - (textWidth / 2)
-//	);
-//	tft.println(label);
-//
-//	tft.drawLine(x, y, x, y + h, color1);
-//	tft.drawLine(x, y, x + w, y, color1);
-//
-//	tft.drawLine(x, y + h, x + w, y + h, color2);
-//	tft.drawLine(x + w, y, x + w, y + h, color2);	
-//}
-
 void drawColourPalette()
 {
 	int x = 20;
@@ -122,50 +90,34 @@ void setup()
 	// start polling for touch
 	tc.Begin();
 
-//	tft.fillScreen(RA8875_BLACK);
-//	// fill screen with a grayish tint
-//	tft.fillScreen(MakeColour(0x1, 0x1, 0x1));
-//
-//	// draw titlebar
-//	tft.fillRect(0, 0, 480, 16, MakeColour(0xf0, 0xf0, 0));
-//
-//
-//
-//	tft.setTextColor(RA8875_RED);
-//	tft.setCursor(0, 0);
-//
-//#if defined(BDLIB)
-//	tft.changeMode(TEXT);
-//	tft.print("Test Titlebar");
-//	tft.changeMode(GRAPHIC);
-//#endif
-//
-//#if defined(ADAFRUIT_LIB)
-//	tft.setFont(&FreeMono12pt7b);
-//	tft.write("Test Titlebar", strlen("Test Titlebar"));
-//#endif
-//
-//#if defined(SUMOTOY_LIB)
-//	tft.print("Test Titlebar");
-//#endif
-
 	// setup widgets
-	lblMinipixel.SetFont(&minipixel_24);
-	lblSquareFont.SetFont(&squarefont_14);
-	lblSquareFuture.SetFont(&squarefuture_20);
-	lblSquareOne14.SetFont(&SquareOne_14);
-	lblSquareOne24.SetFont(&SquareOne_24);
-	lblRubic36.SetFont(&Rubic_36);
 
-	window.AddWidget(&lblMinipixel);
-	window.AddWidget(&lblSquareFont);
-	window.AddWidget(&lblSquareFuture);
-	window.AddWidget(&lblSquareOne14);
-	window.AddWidget(&lblSquareOne24);
-	window.AddWidget(&lblRubic36);
-	window.AddWidget(&btn1);
+#define X_GAP 15
+#define Y_GAP 15
+
+	Dimensions d(100, 60);
+
+	for (int x = 0; x < 2; x++)
+	{
+		for (int y = 0; y < 3; y++)
+		{
+			Point p(10 + (x * (d.Width + X_GAP)), 10 + (y * (d.Height + Y_GAP)));
+
+			auto btn = new Button(dc, p, d, "Button");
+			btn->Content()->Font(&minipixel_24);
+			btn->BackgroundColor(MakeColour(0xea));
+			btn->ForegroundColor(MakeColour(0));
+			window.AddWidget(btn);
+		}
+
+		auto timeWidget = new Label(dc, Point(240, 10), Dimensions(240, 60), "22:40");
+		timeWidget->Content().Font(&squarefuture_20);
+		window.AddWidget(timeWidget);
+	}	
 
 	window.Draw();
+
+	tft.drawFastVLine(240, 10, 262, MakeColour(0xe0));	
 
 	tft.brightness(128);
 
@@ -178,10 +130,8 @@ void setup()
 bool firstTime = true;
 char hitpointLocationStr[50] = { 0 };
 
-
 void loop()
 {	
-	delay(50);
 
 	if (firstTime)
 	{
@@ -189,6 +139,7 @@ void loop()
 		Serial.write("looping...");
 	}
 
+	delay(50);
 	if (!touched)
 	{		
 		touched = tft.touched();
@@ -213,10 +164,10 @@ void loop()
 			touched = false;
 			pendingTouchAction = true;
 			Point hitPoint(tx, ty);
-			if (btn1.IsHit(hitPoint))
-			{
-				btn1.DrawPressed();
-			}
+			//if (btn1.IsHit(hitPoint))
+			//{
+			//	btn1.DrawPressed();
+			//}
 		}
 		else {
 			tft.touchReadPixel(&tx, &ty);

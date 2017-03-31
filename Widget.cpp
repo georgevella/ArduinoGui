@@ -4,6 +4,10 @@
 
 void Ra8875DeviceContext::WriteText(Point& location, const char* text, TColor textColor) const
 {
+	char log[100] = { 0 };
+	sprintf(log, "WriteText@ (%d, %d)", location.X, location.Y);
+	Serial.println(log);
+
 	_ra8875.setTextColor(textColor);
 
 	_ra8875.setCursor(
@@ -130,12 +134,47 @@ bool Widget::NeedsRedraw() const
 	return false;
 }
 
+Caption::Caption(IDeviceContext& dc, Point location, const char* text)
+	: Widget(dc, location), _font(nullptr), _foregroundColor(MakeColour(0xff))
+{
+	if (text != nullptr)
+	{
+		auto ln = strlen(text);
+		ets_strncpy(_text, text, ln < MAX_TEXTLENGTH ? ln : MAX_TEXTLENGTH);
+	}
+}
+
+void Caption::Draw()
+{
+	if (_font != nullptr)
+	{
+		Serial.println("Setting font ...");
+		Dc().SetFont(_font);
+	}
+
+	Serial.println("Drawing text ...");
+	Dc().WriteText(TopLeft(), _text, _foregroundColor);
+
+	if (_font != nullptr)
+	{
+		Serial.println("Resetting font ...");
+		Dc().ResetFont();
+	}
+}
+
 void Label::Draw()
 {
 	auto fontDimensions = Dc().GetFontDimensions();
 
+	char log[100] = { 0 };
+	sprintf(log, "Font Dimensions (%d, %d)", fontDimensions.Width, fontDimensions.Height);
+	Serial.println(log);
+
 	// calculate whole width of label
-	uint8_t textWidth = strlen(_label) * fontDimensions.Width;
+	uint8_t textWidth = _caption.TextLength() * fontDimensions.Width;
+
+	sprintf(log, "Text Width (%d)", textWidth);
+	Serial.println(log);
 
 	Point location;
 
@@ -151,27 +190,14 @@ void Label::Draw()
 		location = _topLeft;
 	}
 
-	
-	if (_font != nullptr)
-	{
-		Serial.println("Setting font ...");
-		Dc().SetFont(_font);
-	}
-
-	Serial.println("Drawing text ...");
-	Dc().WriteText(location, _label, _foregroundColor);
-
-	if (_font != nullptr)
-	{
-		Serial.println("Resetting font ...");
-		Dc().ResetFont();
-	}
+	_caption.TopLeft(location);
+	_caption.Draw();
 }
 
 void Button::DrawWorker(bool pressed)
 {
 	Serial.println("Drawing button...");
-	Dc().DrawRect(_topLeft, _dimensions, MakeColour(0xea));
+	Dc().DrawRect(_topLeft, _dimensions, BackgroundColor());
 
 	auto color1 = (pressed) ? MakeColour(0x9) : MakeColour(0xf0);
 	auto color2 = (pressed) ? MakeColour(0xf0) : MakeColour(0x9);	

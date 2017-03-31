@@ -90,6 +90,17 @@ public:
 	virtual bool TouchEnabled() const = 0;
 };
 
+class ITextLabel
+{
+public:
+	virtual ~ITextLabel() = default;
+	virtual inline const char* Text() const = 0;
+	virtual inline void Text(const char* text) = 0;
+
+	virtual inline void Font(const tFont* font) = 0;
+	virtual inline const tFont* Font() const = 0;
+};
+
 class Ra8875DeviceContext 
 	: public IDeviceContext
 {
@@ -181,21 +192,28 @@ class Widget
 {
 public:
 	explicit Widget(IDeviceContext& tft, Point location)
-		: _topLeft(location), _dc(tft)
+		: _topLeft(location), _backgroundColor(0), _dc(tft)
 	{
-		
 	}
 
 	virtual ~Widget();
 
 	virtual void Draw() = 0;
+	
 	virtual bool NeedsRedraw() const;
+
+	inline void TopLeft(Point& location) { _topLeft = location; }
+	inline Point& TopLeft() { return _topLeft; }
+
+	inline void BackgroundColor(TColor color) { _backgroundColor = color; }
+	inline TColor BackgroundColor() const { return _backgroundColor; }
+
 protected:
 	inline IDeviceContext& Dc() const { return _dc; }
 	Point _topLeft;
 
 private:
-
+	TColor _backgroundColor;
 	IDeviceContext& _dc;
 };
 
@@ -211,40 +229,68 @@ public:
 		_bottomRight = Point(_topLeft.X + _dimensions.Width, _topLeft.Y + _dimensions.Height);
 	}
 
+
+	void Draw() override = 0;
+};
+
+class Caption : public Widget, public ITextLabel
+{
+private:
+#define MAX_TEXTLENGTH 255
+	const tFont* _font;
+	TColor _foregroundColor;
+	char _text[MAX_TEXTLENGTH+1] = { 0 };
+public:
+	Caption(IDeviceContext& dc, Point location, const char* text);
+	~Caption() { }
+
+	void Draw() override;
+
+	inline void Font(const tFont* font) override { _font = font; }
+	inline const tFont* Font() const override { return _font; }
+
+	inline void ForegroundColor(TColor color) { _foregroundColor = color; }
+	inline TColor ForegroundColor() const { return _foregroundColor; }
+
+	inline const char* Text() const override { return _text; }
+	inline void Text(const char* text) override
+	{
+		if (text != nullptr)
+		{
+			auto ln = strlen(text);
+			ets_strncpy(_text, text, ln < MAX_TEXTLENGTH ? ln : MAX_TEXTLENGTH);
+		}
+		else
+		{
+			memset(_text, 0, MAX_TEXTLENGTH);
+		}
+	}
+
+	inline size_t TextLength() const { return strlen(_text); }
 };
 
 class Label : public BoundingBoxWidget
 {
 private:
-	const char* _label;
-	const tFont* _font;
+	Caption _caption;
 	bool _centered;
-	TColor _foregroundColor;
 public:
 	explicit Label(IDeviceContext& dc, Point location, Dimensions dimensions, const char* label)
-		: BoundingBoxWidget(dc, location, dimensions), _label(label), _font(nullptr), _centered(true), _foregroundColor(MakeColour(0xff))
+		: BoundingBoxWidget(dc, location, dimensions), _caption(dc, location, label), _centered(true)
 	{
 	}
 
 	explicit Label(IDeviceContext& dc, Point location, const char* label)
-		: BoundingBoxWidget(dc, location, Dimensions(UINT16_MAX)), _label(label), _font(nullptr), _centered(false), _foregroundColor(MakeColour(0xff))
+		: BoundingBoxWidget(dc, location, Dimensions(UINT16_MAX)), _caption(dc, location, label), _centered(false)
 	{
 	}
+
+	inline Caption& Content() { return _caption; }
 
 	void Draw() override;
 
-	inline void SetFont(const tFont* font)
-	{
-		_font = font;
-	}
-
-	inline void Color(TColor color) { _foregroundColor = color; }
-	inline TColor Color() const { return _foregroundColor; }
-
-	inline void DrawCentered(bool centered)
-	{
-		_centered = centered;
-	}
+	inline void Centered(bool centered) { _centered = centered; }
+	inline bool Centered() const { return _centered; }
 };
 
 class Button : public BoundingBoxWidget
@@ -258,7 +304,12 @@ public:
 		: BoundingBoxWidget(dc, location, dimensions), _label(dc, location, dimensions, label)
 	{
 		
-	}
+	}	
+
+	inline ITextLabel* Content() { return &_label.Content(); }
+
+	inline void ForegroundColor(TColor color) { _label.Content().ForegroundColor(color); }
+	inline TColor ForegroundColor() { return _label.Content().ForegroundColor(); }
 
 	void Draw() override;
 
