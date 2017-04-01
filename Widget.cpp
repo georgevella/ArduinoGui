@@ -146,13 +146,17 @@ Caption::Caption(IDeviceContext& dc, Point location, const char* text)
 
 void Caption::Draw()
 {
+	Serial.println("Caption::Draw() >>");
+
+	char log[200] = { 0 };
 	if (_font != nullptr)
 	{
 		Serial.println("Setting font ...");
 		Dc().SetFont(_font);
 	}
 
-	Serial.println("Drawing text ...");
+	sprintf(log, "Drawing text '%s' ...", _text);
+	Serial.println(log);
 	Dc().WriteText(TopLeft(), _text, _foregroundColor);
 
 	if (_font != nullptr)
@@ -160,18 +164,52 @@ void Caption::Draw()
 		Serial.println("Resetting font ...");
 		Dc().ResetFont();
 	}
+	Serial.println("Caption::Draw() <<");
 }
 
 void Label::Draw()
 {
+	Serial.println("Label::Draw() >>");
+
+	if (_caption.Font()!= nullptr)
+		Dc().SetFont(_caption.Font());
+
 	auto fontDimensions = Dc().GetFontDimensions();
 
 	char log[100] = { 0 };
-	sprintf(log, "Font Dimensions (%d, %d)", fontDimensions.Width, fontDimensions.Height);
-	Serial.println(log);
+
+	uint16_t textWidth = 0;
 
 	// calculate whole width of label
-	uint8_t textWidth = _caption.TextLength() * fontDimensions.Width;
+	if (fontDimensions.Width != 0)
+	{
+		sprintf(log, "Font Dimensions (%d, %d)", fontDimensions.Width, fontDimensions.Height);
+		Serial.println(log);
+		textWidth = _caption.TextLength() * fontDimensions.Width;
+	}
+	else
+	{
+		Serial.println("Calculation font dimensions ...");
+
+		const tFont* font = _caption.Font();
+		if (font != nullptr)
+		{
+			size_t count = _caption.TextLength();
+			char* ptr = const_cast<char*>(_caption.Text());
+
+			do
+			{				
+				for (int i = 0; i< font->length;i++)
+				{
+					if (font->chars[i].char_code == *ptr)
+					{
+						textWidth += font->chars[i].image->image_width;
+					}
+				}
+				ptr++;
+			} while (--count > 0);
+		}
+	}
 
 	sprintf(log, "Text Width (%d)", textWidth);
 	Serial.println(log);
@@ -192,6 +230,8 @@ void Label::Draw()
 
 	_caption.TopLeft(location);
 	_caption.Draw();
+
+	Serial.println("Label::Draw() <<");
 }
 
 void Button::DrawWorker(bool pressed)

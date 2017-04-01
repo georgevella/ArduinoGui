@@ -1,30 +1,16 @@
-#include "GfxUtils.h"
-#define ESP8266
-#define SUMOTOY_LIB
-
 #include <SPI.h>
-
-#ifdef defined(BDLIB)
-//#include <BuyDisplay_RA8875/BD_RA8875.h>
-#define touched				touchDetect
-#elif defined(ADAFRUIT_LIB)
-//#include <Adafruit_RA8875/Adafruit_RA8875.h>
-//#include <Adafruit_GFX/Fonts/FreeMono12pt7b.h >
-#define touchReadPixel		touchRead
-#elif defined(SUMOTOY_LIB)
 #include <RA8875/RA8875.h>
-#include "RA8875/fonts/minipixel_24.c"//minipixel
-#include "RA8875/fonts/squarefont_14.c"//minipixel
-#include "RA8875/fonts/squarefuture_20.c"//minipixel
-#include "RA8875/fonts/squareone_14.c"//minipixel
-#include "RA8875/fonts/squareone_24.c"//minipixel
-#include "RA8875/fonts/rubic_36.c"//minipixel
-
-#define fillScreen			fillWindow
-#endif
-
 #include "GfxUtils.h"
 #include "Widget.h"
+
+// fonts
+#include "Comfortaa_16.c"
+#include "Comfortaa_16b.c"
+#include "Comfortaa_32b.c"
+
+// icons
+#include "Connectivity.c"
+#include "Weather_Cloudy.c"
 
 
 #define RA8875_INT	D2
@@ -33,11 +19,7 @@
 #define RA8875_RESET D1
 
 // setup instance of RA8875
-#if ADAFRUIT_LIB
-Adafruit_RA8875 tft = Adafruit_RA8875(RA8875_CS, RA8875_RESET);
-#else
 RA8875 tft = RA8875(RA8875_CS, RA8875_RESET);
-#endif 
 
 Ra8875DeviceContext dc = Ra8875DeviceContext(tft);
 Ra8875TouchContext tc = Ra8875TouchContext(tft, RA8875_INT);
@@ -95,36 +77,81 @@ void setup()
 #define X_GAP 15
 #define Y_GAP 15
 
+#define SCREENBORDER_Y	10
+#define SCREENBORDER_X	10
+
+#define SECTION_TIME_HEIGHT 60
+#define SECTION_TIME_BOTTOM SCREENBORDER_Y + SECTION_TIME_HEIGHT + SCREENBORDER_Y
+
+#define SECTION_NOTIFICATIONS_TOP SECTION_TIME_BOTTOM + SCREENBORDER_Y
+
 	Dimensions d(100, 60);
 
 	for (int x = 0; x < 2; x++)
 	{
 		for (int y = 0; y < 3; y++)
 		{
-			Point p(10 + (x * (d.Width + X_GAP)), 10 + (y * (d.Height + Y_GAP)));
+			Point p(SCREENBORDER_X + (x * (d.Width + X_GAP)), SCREENBORDER_Y + (y * (d.Height + Y_GAP)));
 
 			auto btn = new Button(dc, p, d, "Button");
-			btn->Content()->Font(&minipixel_24);
-			btn->BackgroundColor(MakeColour(0xea));
+			btn->Content()->Font(&Comfortaa_16);
+			btn->BackgroundColor(0xFCE0);
 			btn->ForegroundColor(MakeColour(0));
 			window.AddWidget(btn);
 		}
-
-		auto timeWidget = new Label(dc, Point(240, 10), Dimensions(240, 60), "22:40");
-		timeWidget->Content().Font(&squarefuture_20);
-		window.AddWidget(timeWidget);
 	}	
 
-	window.Draw();
+	// find midpoint
+	uint16_t mid_x = tft.width() / 2;
+	uint16_t mid_h = tft.height() - (2 * SCREENBORDER_Y);
+	
+	auto timeWidget = new Label(dc, 
+		Point(mid_x+ Weather_Cloudy.width+SCREENBORDER_X, SCREENBORDER_Y), 
+		Dimensions(mid_x-Weather_Cloudy.width-SCREENBORDER_X, SECTION_TIME_HEIGHT), 
+		"22:40");
+	timeWidget->Content().Font(&Comfortaa_32b);
+	window.AddWidget(timeWidget);
 
-	tft.drawFastVLine(240, 10, 262, MakeColour(0xe0));	
+	//window.Draw();
 
-	tft.brightness(128);
+	// draw borders
+	tft.drawFastVLine(mid_x, SCREENBORDER_Y, mid_h, 0xFFDF);
+
+	tft.drawFastHLine(mid_x + SCREENBORDER_X, SECTION_TIME_BOTTOM, mid_x - (2 * SCREENBORDER_X), 0xFFDF);
+
+	//drawMonochromeCompressed(tft, image_data_Connectivity, 24, 24, mid_x + SCREENBORDER_X, 80);
+
+#define SIDEBAR_WIDTH		100
+#define TITLEBAR_HEIGHT		25
+
+#define INNERQUAD_WIDTH		10
+#define INNERQUAD_HEIGHT	10
+#define MAX_WIDTH			(SIDEBAR_WIDTH + INNERQUAD_WIDTH)
+#define MAX_HEIGHT			(TITLEBAR_HEIGHT+INNERQUAD_HEIGHT)
+#define QUADRANT_WIDTH		25
+#define QUADRANT_HEIGHT		25
+
+	tft.fillCurve(QUADRANT_WIDTH, QUADRANT_HEIGHT, QUADRANT_WIDTH, QUADRANT_HEIGHT, 1, 0xFCE0);
+	tft.fillRect(0, QUADRANT_HEIGHT, QUADRANT_WIDTH, MAX_HEIGHT - QUADRANT_HEIGHT, 0xfce0);
+	tft.fillRect(QUADRANT_WIDTH, 0, MAX_WIDTH - QUADRANT_WIDTH, MAX_HEIGHT, 0xFCE0);
+	tft.fillCurve(MAX_WIDTH, MAX_HEIGHT, INNERQUAD_WIDTH, INNERQUAD_HEIGHT, 1, 0);
+
+	tft.fillCurve(QUADRANT_WIDTH, tft.height() - QUADRANT_HEIGHT, QUADRANT_WIDTH, QUADRANT_HEIGHT, 0, 0xFCE0);
+	tft.fillRect(0, tft.height() - QUADRANT_HEIGHT - INNERQUAD_HEIGHT, QUADRANT_WIDTH, INNERQUAD_HEIGHT, 0xfce0);
+	tft.fillRect(QUADRANT_WIDTH, tft.height() - QUADRANT_HEIGHT - INNERQUAD_HEIGHT, MAX_WIDTH - QUADRANT_WIDTH, MAX_HEIGHT, 0xFCE0);
+	tft.fillCurve(MAX_WIDTH, tft.height() - MAX_HEIGHT, INNERQUAD_WIDTH, INNERQUAD_HEIGHT, 0, 0);
+
+	//tft.fillRect(0, MAX_HEIGHT, SIDEBAR_WIDTH, tft.height() - (MAX_HEIGHT * 2), 0xFCE0);
+
+	//tft.fillRect(MAX_WIDTH, 0, tft.width() - MAX_WIDTH, TITLEBAR_HEIGHT, 0xfce0);
+
+	drawMonochromeCompressed(tft, Connectivity, mid_x + SCREENBORDER_X, SECTION_NOTIFICATIONS_TOP, RA8875_WHITE);
+	drawMonochromeCompressed(tft, Weather_Cloudy, mid_x + SCREENBORDER_X, SCREENBORDER_Y + ((SECTION_TIME_HEIGHT / 2) - (Weather_Cloudy.height / 2)), RA8875_WHITE);
+
+	tft.brightness(128);	
 
 	//tft.touched();
-#if defined(SUMOTOY_LIB)
 	tft.enableISR();
-#endif
 }
 
 bool firstTime = true;
