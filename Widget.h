@@ -91,6 +91,12 @@ public:
 class Widget
 {
 public:
+	explicit Widget(IDeviceContext& dc)
+		: _topLeft(), _backgroundColor(0), _dc(dc)
+	{
+		
+	}
+
 	explicit Widget(IDeviceContext& tft, Point location)
 		: _topLeft(location), _backgroundColor(0), _dc(tft)
 	{

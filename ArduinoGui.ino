@@ -7,7 +7,7 @@
 #include "RA8875DeviceContext.h"
 
 #include "Widget.h"
-
+#include "LCARSUI.h"
 // fonts
 #include "Comfortaa_16.c"
 #include "Comfortaa_16b.c"
@@ -64,6 +64,17 @@ void drawColourPalette()
 	}
 }
 
+#define X_GAP 15
+#define Y_GAP 4
+
+#define SCREENBORDER_Y	10
+#define SCREENBORDER_X	10
+
+#define SECTION_TIME_HEIGHT 60
+#define SECTION_TIME_BOTTOM SCREENBORDER_Y + SECTION_TIME_HEIGHT + SCREENBORDER_Y
+
+#define SECTION_NOTIFICATIONS_TOP SECTION_TIME_BOTTOM + SCREENBORDER_Y
+
 void setup()
 {
 	Serial.begin(38400);
@@ -78,28 +89,6 @@ void setup()
 	tc.Begin();
 
 	// setup widgets
-
-#define X_GAP 15
-#define Y_GAP 4
-
-#define SCREENBORDER_Y	10
-#define SCREENBORDER_X	10
-
-#define SECTION_TIME_HEIGHT 60
-#define SECTION_TIME_BOTTOM SCREENBORDER_Y + SECTION_TIME_HEIGHT + SCREENBORDER_Y
-
-#define SECTION_NOTIFICATIONS_TOP SECTION_TIME_BOTTOM + SCREENBORDER_Y
-
-#define SIDEBAR_WIDTH		100
-#define TITLEBAR_HEIGHT		25
-
-#define INNERQUAD_WIDTH		11
-#define INNERQUAD_HEIGHT	11
-#define MAX_WIDTH			(SIDEBAR_WIDTH + INNERQUAD_WIDTH)
-#define MAX_HEIGHT			(TITLEBAR_HEIGHT+INNERQUAD_HEIGHT)
-#define QUADRANT_WIDTH		25
-#define QUADRANT_HEIGHT		25
-
 	Dimensions d(100, 45);
 
 	for (int x = 0; x < 1; x++)
@@ -129,6 +118,9 @@ void setup()
 	timeWidget->Font()->Font(&Comfortaa_32b);
 	window.AddWidget(timeWidget);	
 
+	window.AddWidget(new LCarsCorner(dc, LCARS_CORNER_TOPLEFT));
+	window.AddWidget(new LCarsCorner(dc, LCARS_CORNER_BOTTOMLEFT));
+
 	// draw borders
 	//tft.drawFastVLine(mid_x, SCREENBORDER_Y, mid_h, 0xFFDF);
 
@@ -138,15 +130,15 @@ void setup()
 
 
 
-	dc.DrawQuadrant(Point(QUADRANT_WIDTH, QUADRANT_HEIGHT), Dimensions(QUADRANT_WIDTH, QUADRANT_HEIGHT), DRAWCURVEQUAD_360, 0xFCE0, 0xFCE0);
-	tft.fillRect(0, QUADRANT_HEIGHT, QUADRANT_WIDTH, MAX_HEIGHT - QUADRANT_HEIGHT, 0xfce0);
-	tft.fillRect(QUADRANT_WIDTH, 0, MAX_WIDTH - QUADRANT_WIDTH, MAX_HEIGHT, 0xFCE0);
-	dc.DrawQuadrant(Point(MAX_WIDTH, MAX_HEIGHT), Dimensions(INNERQUAD_WIDTH, INNERQUAD_HEIGHT), DRAWCURVEQUAD_360, 0, 0);
+	//dc.DrawQuadrant(Point(QUADRANT_WIDTH, QUADRANT_HEIGHT), Dimensions(QUADRANT_WIDTH, QUADRANT_HEIGHT), DRAWCURVEQUAD_360, 0xFCE0, 0xFCE0);
+	//tft.fillRect(0, QUADRANT_HEIGHT, QUADRANT_WIDTH, MAX_HEIGHT - QUADRANT_HEIGHT, 0xfce0);
+	//tft.fillRect(QUADRANT_WIDTH, 0, MAX_WIDTH - QUADRANT_WIDTH, MAX_HEIGHT, 0xFCE0);
+	//dc.DrawQuadrant(Point(MAX_WIDTH, MAX_HEIGHT), Dimensions(INNERQUAD_WIDTH, INNERQUAD_HEIGHT), DRAWCURVEQUAD_360, 0, 0);
 
-	tft.fillCurve(QUADRANT_WIDTH, tft.height() - QUADRANT_HEIGHT, QUADRANT_WIDTH, QUADRANT_HEIGHT, 0, 0xFCE0);
-	tft.fillRect(0, tft.height() - QUADRANT_HEIGHT - INNERQUAD_HEIGHT, QUADRANT_WIDTH, INNERQUAD_HEIGHT, 0xfce0);
-	tft.fillRect(QUADRANT_WIDTH, tft.height() - QUADRANT_HEIGHT - INNERQUAD_HEIGHT, MAX_WIDTH - QUADRANT_WIDTH, MAX_HEIGHT, 0xFCE0);
-	tft.fillCurve(MAX_WIDTH, tft.height() - MAX_HEIGHT, INNERQUAD_WIDTH, INNERQUAD_HEIGHT, 0, 0);
+	//tft.fillCurve(QUADRANT_WIDTH, tft.height() - QUADRANT_HEIGHT, QUADRANT_WIDTH, QUADRANT_HEIGHT, 0, 0xFCE0);
+	//tft.fillRect(0, tft.height() - QUADRANT_HEIGHT - INNERQUAD_HEIGHT, QUADRANT_WIDTH, INNERQUAD_HEIGHT, 0xfce0);
+	//tft.fillRect(QUADRANT_WIDTH, tft.height() - QUADRANT_HEIGHT - INNERQUAD_HEIGHT, MAX_WIDTH - QUADRANT_WIDTH, MAX_HEIGHT, 0xFCE0);
+	//tft.fillCurve(MAX_WIDTH, tft.height() - MAX_HEIGHT, INNERQUAD_WIDTH, INNERQUAD_HEIGHT, 0, 0);
 
 	window.Draw();
 	//tft.fillRect(0, MAX_HEIGHT, SIDEBAR_WIDTH, tft.height() - (MAX_HEIGHT * 2), 0xFCE0);

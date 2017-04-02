@@ -84,12 +84,16 @@
     <ClInclude Include="GfxUtils.h" />
     <ClInclude Include="GuiCommon.h" />
     <ClInclude Include="IDeviceContext.h" />
+    <ClInclude Include="LCARSUI.h" />
+    <ClInclude Include="RA8875DeviceContext.h" />
     <ClInclude Include="Widget.h" />
     <ClInclude Include="__vm\.ArduinoGui.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FontSettings.cpp" />
     <ClCompile Include="GfxUtils.cpp" />
+    <ClCompile Include="LCARSUI.cpp" />
+    <ClCompile Include="RA8875DeviceContext.cpp" />
     <ClCompile Include="Widget.cpp" />
   </ItemGroup>
   <PropertyGroup>
