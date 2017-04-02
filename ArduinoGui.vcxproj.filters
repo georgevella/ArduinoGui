@@ -27,12 +27,24 @@
     <ClInclude Include="GfxUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FontSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IDeviceContext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiCommon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Widget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GfxUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FontSettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

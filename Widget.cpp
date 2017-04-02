@@ -99,7 +99,7 @@ void Window::RemoveWidget(Widget& widget)
 
 void Window::Draw() const
 {
-	_deviceContext.FillScreen(_windowBackground);
+	//_deviceContext.FillScreen(_windowBackground);
 
 	if (_showTitleBar)
 	{
@@ -134,50 +134,16 @@ bool Widget::NeedsRedraw() const
 	return false;
 }
 
-Caption::Caption(IDeviceContext& dc, Point location, const char* text)
-	: Widget(dc, location), _font(nullptr), _foregroundColor(MakeColour(0xff))
-{
-	if (text != nullptr)
-	{
-		auto ln = strlen(text);
-		ets_strncpy(_text, text, ln < MAX_TEXTLENGTH ? ln : MAX_TEXTLENGTH);
-	}
-}
-
-void Caption::Draw()
-{
-	Serial.println("Caption::Draw() >>");
-
-	char log[200] = { 0 };
-	if (_font != nullptr)
-	{
-		Serial.println("Setting font ...");
-		Dc().SetFont(_font);
-	}
-
-	sprintf(log, "Drawing text '%s' ...", _text);
-	Serial.println(log);
-	Dc().WriteText(TopLeft(), _text, _foregroundColor);
-
-	if (_font != nullptr)
-	{
-		Serial.println("Resetting font ...");
-		Dc().ResetFont();
-	}
-	Serial.println("Caption::Draw() <<");
-}
-
 void Label::Draw()
 {
 	Serial.println("Label::Draw() >>");
 
-	if (_caption.Font()!= nullptr)
-		Dc().SetFont(_caption.Font());
-
+	_fontSettings.ApplyFont();
 	auto fontDimensions = Dc().GetFontDimensions();
 
-	char log[100] = { 0 };
+	char log[200] = { 0 };
 
+	size_t textLength = TextLength();
 	uint16_t textWidth = 0;
 
 	// calculate whole width of label
@@ -185,17 +151,17 @@ void Label::Draw()
 	{
 		sprintf(log, "Font Dimensions (%d, %d)", fontDimensions.Width, fontDimensions.Height);
 		Serial.println(log);
-		textWidth = _caption.TextLength() * fontDimensions.Width;
+		textWidth = textLength * fontDimensions.Width;
 	}
 	else
 	{
 		Serial.println("Calculation font dimensions ...");
 
-		const tFont* font = _caption.Font();
+		const tFont* font = _fontSettings.Font();
 		if (font != nullptr)
 		{
-			size_t count = _caption.TextLength();
-			char* ptr = const_cast<char*>(_caption.Text());
+			size_t count = textLength;
+			char* ptr = _text;
 
 			do
 			{				
@@ -214,22 +180,41 @@ void Label::Draw()
 	sprintf(log, "Text Width (%d)", textWidth);
 	Serial.println(log);
 
-	Point location;
+	uint16_t xLocation = 0, yLocation = 0;
 
-	if (_centered)
+	switch (_horizontal_alignment)
 	{
-		location = Point(
-			(_topLeft.X + (_dimensions.Width / 2)) - (textWidth / 2),
-			(_topLeft.Y + (_dimensions.Height / 2)) - (fontDimensions.Height / 2)
-		);
-	}
-	else
-	{
-		location = _topLeft;
+	case HA_CENTRE:
+		xLocation = (_topLeft.X + (_dimensions.Width / 2)) - (textWidth / 2);
+		break;
+	case HA_RIGHT:
+		xLocation = (_topLeft.X + _dimensions.Width) - textWidth;
+		break;
+	case HA_LEFT:
+		xLocation = _topLeft.X;
+		break;
 	}
 
-	_caption.TopLeft(location);
-	_caption.Draw();
+	switch (_vertical_alignment)
+	{
+	case VA_TOP:
+		yLocation = _topLeft.Y;
+		break;
+	case VA_MIDDLE:
+		yLocation = (_topLeft.Y + (_dimensions.Height / 2)) - (fontDimensions.Height / 2);
+		break;
+	case VA_BOTTOM:
+		yLocation = (_topLeft.Y + _dimensions.Height) - fontDimensions.Height;
+		break;
+	}
+
+	auto location = Point(xLocation, yLocation);
+
+	sprintf(log, "Drawing text '%s' @ [%d, %d] ...", _text, xLocation, yLocation);
+	Serial.println(log);
+	Dc().WriteText(location, _text, _foregroundColor);
+
+	_fontSettings.ResetFont();
 
 	Serial.println("Label::Draw() <<");
 }
@@ -239,19 +224,19 @@ void Button::DrawWorker(bool pressed)
 	Serial.println("Drawing button...");
 	Dc().DrawRect(_topLeft, _dimensions, BackgroundColor());
 
-	auto color1 = (pressed) ? MakeColour(0x9) : MakeColour(0xf0);
-	auto color2 = (pressed) ? MakeColour(0xf0) : MakeColour(0x9);	
+	//auto color1 = (pressed) ? MakeColour(0x9) : MakeColour(0xf0);
+	//auto color2 = (pressed) ? MakeColour(0xf0) : MakeColour(0x9);	
 
 	_label.Draw();
 
-	auto bottomLeft = Point(_topLeft.X, _bottomRight.Y);
-	auto topRight = Point(_bottomRight.X, _topLeft.Y);
+	//auto bottomLeft = Point(_topLeft.X, _bottomRight.Y);
+	//auto topRight = Point(_bottomRight.X, _topLeft.Y);
 
-	Dc().DrawLine(_topLeft, bottomLeft, color1);
-	Dc().DrawLine(_topLeft, topRight, color1);
+	//Dc().DrawLine(_topLeft, bottomLeft, color1);
+	//Dc().DrawLine(_topLeft, topRight, color1);
 
-	Dc().DrawLine(bottomLeft, _bottomRight, color2);
-	Dc().DrawLine(topRight, _bottomRight, color2);
+	//Dc().DrawLine(bottomLeft, _bottomRight, color2);
+	//Dc().DrawLine(topRight, _bottomRight, color2);
 }
 
 void Button::Draw()
