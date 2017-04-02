@@ -36,6 +36,7 @@ public:
 
 	void DrawCurve(Point center, Dimensions axis, DC_DRAWCURVE_QUADRANT quadrant, TColor borderColor) override;
 	void DrawQuadrant(Point center, Dimensions axis, DC_DRAWCURVE_QUADRANT quadrant, TColor borderColor, TColor fillColor) override;
+	Dimensions GetScreenDimensions() const override;
 private:
 	RA8875& _ra8875;
 };

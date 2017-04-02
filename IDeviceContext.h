@@ -4,6 +4,7 @@
 #define _I_DEVICE_CONTEXT
 
 #include "GuiCommon.h"
+#include <RA8875/_settings/font.h>
 
 ///0[180-270°],1[270-0°],2[0-90°],3[90-180°]
 enum DC_DRAWCURVE_QUADRANT
@@ -20,6 +21,7 @@ public:
 	virtual ~IDeviceContext() = default;
 	virtual void WriteText(Point location, const char* text, TColor textColor) const = 0;
 	virtual Dimensions GetFontDimensions() const = 0;
+	virtual Dimensions GetScreenDimensions() const = 0;
 
 	virtual void DrawBorder(Point location, Dimensions dimensions, TColor borderColor) const = 0;
 	virtual void DrawRect(Point location, Dimensions dimensions, TColor fillColor) const = 0;

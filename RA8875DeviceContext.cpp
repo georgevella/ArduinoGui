@@ -68,3 +68,8 @@ void Ra8875DeviceContext::DrawQuadrant(Point center, Dimensions axis, DC_DRAWCUR
 	if (borderColor != fillColor)
 		_ra8875.drawCurve(center.X, center.Y, axis.Width, axis.Height, quadrant, borderColor);
 }
+
+Dimensions Ra8875DeviceContext::GetScreenDimensions() const
+{
+	return Dimensions(_ra8875.width(), _ra8875.height());
+}
