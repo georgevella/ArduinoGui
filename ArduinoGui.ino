@@ -1,7 +1,11 @@
+#include "LCARSUI.h"
 #include "FontSettings.h"
 #include <SPI.h>
 #include <RA8875/RA8875.h>
 #include "GfxUtils.h"
+
+#include "RA8875DeviceContext.h"
+
 #include "Widget.h"
 
 // fonts
@@ -134,10 +138,10 @@ void setup()
 
 
 
-	tft.fillCurve(QUADRANT_WIDTH, QUADRANT_HEIGHT, QUADRANT_WIDTH, QUADRANT_HEIGHT, 1, 0xFCE0);
+	dc.DrawQuadrant(Point(QUADRANT_WIDTH, QUADRANT_HEIGHT), Dimensions(QUADRANT_WIDTH, QUADRANT_HEIGHT), DRAWCURVEQUAD_360, 0xFCE0, 0xFCE0);
 	tft.fillRect(0, QUADRANT_HEIGHT, QUADRANT_WIDTH, MAX_HEIGHT - QUADRANT_HEIGHT, 0xfce0);
 	tft.fillRect(QUADRANT_WIDTH, 0, MAX_WIDTH - QUADRANT_WIDTH, MAX_HEIGHT, 0xFCE0);
-	tft.fillCurve(MAX_WIDTH, MAX_HEIGHT, INNERQUAD_WIDTH, INNERQUAD_HEIGHT, 1, 0);
+	dc.DrawQuadrant(Point(MAX_WIDTH, MAX_HEIGHT), Dimensions(INNERQUAD_WIDTH, INNERQUAD_HEIGHT), DRAWCURVEQUAD_360, 0, 0);
 
 	tft.fillCurve(QUADRANT_WIDTH, tft.height() - QUADRANT_HEIGHT, QUADRANT_WIDTH, QUADRANT_HEIGHT, 0, 0xFCE0);
 	tft.fillRect(0, tft.height() - QUADRANT_HEIGHT - INNERQUAD_HEIGHT, QUADRANT_WIDTH, INNERQUAD_HEIGHT, 0xfce0);

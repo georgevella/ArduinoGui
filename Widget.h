@@ -26,31 +26,6 @@ public:
 	virtual bool TouchEnabled() const = 0;
 };
 
-class Ra8875DeviceContext 
-	: public IDeviceContext
-{
-public:
-	explicit Ra8875DeviceContext(RA8875& ra8875): _ra8875(ra8875) {
-		
-	}
-
-	void WriteText(Point& location, const char* text, TColor textColor) const override;
-
-	Dimensions GetFontDimensions() const override;
-
-	void DrawBorder(Point& location, Dimensions& dimensions, TColor borderColor) const override;
-
-	void DrawRect(Point& location, Dimensions& dimensions, TColor fillColor) const override;
-
-	void DrawLine(Point& startLocation, Point& endLocation, TColor lineColor) const override;
-
-	void SetFont(const tFont* font) const override;
-	void ResetFont() const override;
-	void FillScreen(TColor fillColor) const override;
-private:
-	RA8875& _ra8875;
-};
-
 class Ra8875TouchContext 
 	: public ITouchContext
 {
