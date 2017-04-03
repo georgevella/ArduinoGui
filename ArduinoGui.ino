@@ -9,6 +9,7 @@
 #include "Widget.h"
 #include "LCARSUI.h"
 // fonts
+#include "fonts/minipixel_24.c"
 #include "Comfortaa_16.c"
 #include "Comfortaa_16b.c"
 #include "Comfortaa_32b.c"
@@ -96,12 +97,12 @@ void setup()
 		for (int y = 0; y < 4; y++)
 		{
 			//0, MAX_HEIGHT
-			Point p(x * (d.Width + X_GAP), (MAX_HEIGHT + Y_GAP) + (y * (d.Height + Y_GAP)));
+			Point p(x * (d.Width + X_GAP), (LCarsSettings.topLeftCornerHeight + Y_GAP) + (y * (d.Height + Y_GAP)));
 
 			auto btn = new Button(dc, p, d);
 			btn->Content()->Text("ButtonX");
-			btn->Content()->Font()->Font(&Comfortaa_16b);
-			btn->BackgroundColor(0x42B7);
+			btn->Content()->Font()->Font(&minipixel_24);
+			btn->BackgroundColor(LCARS_LIGHTBLUE);
 			btn->Content()->ForegroundColor(MakeColour(0));
 			window.AddWidget(btn);
 		}
@@ -112,14 +113,27 @@ void setup()
 	uint16_t mid_h = tft.height() - (2 * SCREENBORDER_Y);
 	
 	auto timeWidget = new Label(dc, 
-		Point(mid_x+ Weather_Cloudy.width+SCREENBORDER_X, SCREENBORDER_Y), 
+		Point(100+SCREENBORDER_X, 30), 
 		Dimensions(mid_x-Weather_Cloudy.width-SCREENBORDER_X, SECTION_TIME_HEIGHT));
 	timeWidget->Text("22:40");
 	timeWidget->Font()->Font(&Comfortaa_32b);
+	timeWidget->ForegroundColor(LCARS_BARELYRED);
+	timeWidget->VerticalAlignment(VA_MIDDLE);
+	timeWidget->HorizontalAlignment(HA_LEFT);
 	window.AddWidget(timeWidget);	
 
 	window.AddWidget(new LCarsCorner(dc, LCARS_CORNER_TOPLEFT));
 	window.AddWidget(new LCarsCorner(dc, LCARS_CORNER_BOTTOMLEFT));
+
+	auto titlebar = new LCarsTitleBar(dc);
+	titlebar->Caption()->Text("System Status");
+	titlebar->Caption()->Font()->Font(&minipixel_24);
+	window.AddWidget(titlebar);
+
+	auto footer = new LCarsFooter(dc);
+	footer->Caption()->Text("192.168.0.0");
+	footer->Caption()->Font()->Font(&minipixel_24);
+	window.AddWidget(footer);
 
 	// draw borders
 	//tft.drawFastVLine(mid_x, SCREENBORDER_Y, mid_h, 0xFFDF);
@@ -145,8 +159,8 @@ void setup()
 
 	//tft.fillRect(MAX_WIDTH, 0, tft.width() - MAX_WIDTH, TITLEBAR_HEIGHT, 0xfce0);
 
-	drawMonochromeCompressed(tft, Connectivity, mid_x + SCREENBORDER_X, SECTION_NOTIFICATIONS_TOP, RA8875_WHITE);
-	drawMonochromeCompressed(tft, Weather_Cloudy, mid_x + SCREENBORDER_X, SCREENBORDER_Y + ((SECTION_TIME_HEIGHT / 2) - (Weather_Cloudy.height / 2)), RA8875_WHITE);
+	/*drawMonochromeCompressed(tft, Connectivity, mid_x + SCREENBORDER_X, SECTION_NOTIFICATIONS_TOP, RA8875_WHITE);
+	drawMonochromeCompressed(tft, Weather_Cloudy, mid_x + SCREENBORDER_X, SCREENBORDER_Y + ((SECTION_TIME_HEIGHT / 2) - (Weather_Cloudy.height / 2)), RA8875_WHITE);*/
 
 	tft.brightness(128);	
 
