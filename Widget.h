@@ -137,16 +137,23 @@ public:
 
 
 	void Draw() override = 0;
+
+	inline void Size(Dimensions& dims)
+	{
+		_dimensions = dims;
+		_bottomRight = Point(_topLeft.X + _dimensions.Width, _topLeft.Y + _dimensions.Height);
+	}
+	inline ::Dimensions& Size() { return _dimensions; }
 };
 
-enum VerticalAlignment
+enum WidgetVerticalAlignment
 {
 	VA_TOP,
 	VA_MIDDLE,
 	VA_BOTTOM
 };
 
-enum HorizontalAlignment
+enum WidgetHorizontalAlignment
 {
 	HA_LEFT,
 	HA_CENTRE,
@@ -159,11 +166,16 @@ private:
 	TColor _foregroundColor;
 	char _text[MAX_TEXTLENGTH + 1] = { 0 };
 	FontSettings _fontSettings;
-	VerticalAlignment _vertical_alignment;
-	HorizontalAlignment _horizontal_alignment;
+	WidgetVerticalAlignment _vertical_alignment;
+	WidgetHorizontalAlignment _horizontal_alignment;
 public:
 	explicit Label(IDeviceContext& dc, Point location, Dimensions dimensions)
 		: BoundingBoxWidget(dc, location, dimensions), _foregroundColor(RA8875_WHITE), _fontSettings(dc),  _vertical_alignment(VA_MIDDLE), _horizontal_alignment(HA_CENTRE)
+	{
+	}
+	
+	explicit Label(IDeviceContext& dc)
+		: BoundingBoxWidget(dc, Point(0,0), Dimensions(100,10)), _foregroundColor(RA8875_WHITE), _fontSettings(dc),  _vertical_alignment(VA_MIDDLE), _horizontal_alignment(HA_CENTRE)
 	{
 	}
 
@@ -178,6 +190,12 @@ public:
 
 	inline void ForegroundColor(TColor color) { _foregroundColor = color; }
 	inline TColor ForegroundColor() const { return _foregroundColor; }
+
+	inline void VerticalAlignment(::WidgetVerticalAlignment value) { _vertical_alignment = value; }
+	inline ::WidgetVerticalAlignment VerticalAlignment() const { return _vertical_alignment; }
+
+	inline void HorizontalAlignment(WidgetHorizontalAlignment value) { _horizontal_alignment = value; }
+	inline ::WidgetHorizontalAlignment HorizontalAlignment() const { return _horizontal_alignment; }
 
 	inline const char* Text() const { return _text; }
 	inline void Text(const char* text) 
